@@ -8,7 +8,7 @@
 /*Goal is to receive current date and another date in the past, and to return:
   a. what day of the week was the past date given
   b. how many days have passed from that past date until today
-  Use time.h is forbidden.*/
+  Using time.h is forbidden.*/
 
 #include<stdbool.h>
 #include<stdio.h>
@@ -18,11 +18,13 @@ char* get_date(char date_type[]);
 
 bool verify_date(char date[]);
 
-void main()
+int main(void)
 {
     char* current_date = "0000-00-00";
     char* target_date = "0000-00-00";
 
+    // both are storing the same value (the one supplied later).
+    // Something to do with the definition inside the function, but how to get around it?
     printf("\n");
     current_date = get_date("current");
     target_date = get_date("target");
