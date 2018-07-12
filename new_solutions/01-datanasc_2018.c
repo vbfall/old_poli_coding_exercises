@@ -21,6 +21,9 @@ bool check_dashes(char date[]);
 // Gets date_type[] date from user, as a string, and stores it into date[]
 void get_date(char date_type[], char date[]);
 
+// Checks if a year is a leap year
+bool is_leap_year(int year);
+
 // checks if date is valid
 bool valid_date(char date[]);
 
@@ -88,10 +91,24 @@ void get_date(char date_type[], char date[])
     }
 } /*end of get_date */
 
+bool is_leap_year(int year)
+{
+    bool check = false;
+    if(year % 4 == 0)
+    {
+        if(year % 100 != 0 || year % 400 == 0)
+        {check = true;}
+    }
+    return check;
+} // end of is_leap_year
+
 bool valid_date(char date[])
 {
     bool check = false;
-    int year = ((int) (date[0] - '0'))*1000 + ((int) (date[1] - '0'))*100 + ((int) (date[2] - '0'))*10 + (int) (date[3] - '0');
+    int year = ((int) (date[0] - '0'))*1000
+        + ((int) (date[1] - '0'))*100
+        + ((int) (date[2] - '0'))*10
+        + (int) (date[3] - '0');
     int month = ((int) (date[5] - '0'))*10 + (int) (date[6] - '0');
     int day = ((int) (date[8] - '0'))*10 + (int) (date[9] - '0');
     if(month >= 1 && month <= 12)
@@ -101,7 +118,7 @@ bool valid_date(char date[])
             switch(month)
             {
                 case 2:
-                    if(day <= 28 || (day == 29 && year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)))
+                    if(day <= 28 || (day == 29 && is_leap_year(year)) )
                     {check = true;}
                     break;
                 case 4:
