@@ -18,6 +18,16 @@
 // and only in the correct position
 bool check_dashes(char date[]);
 
+// receives a date in proper format and returns difference in days
+// from 2000-01-01 to given date. Result is positive if date is after
+// 2000-01-01, negative if before
+int difference_to_y2k(char date[]);
+
+// next three functions extract parts of a valid date
+int extract_day(char date[]);
+int extract_month(char date[]);
+int extract_year(char date[]);
+
 // Gets date_type[] date from user, as a string, and stores it into date[]
 void get_date(char date_type[], char date[]);
 
@@ -32,23 +42,25 @@ bool verify_date(char date[]);
 
 int main(void)
 {
+    int dcurrent, dtarget;
     char current_date[] = "0000-00-00";
     char target_date[] = "0000-00-00";
+//    char dow_current[10], dow_target[10];
 
     printf("\n");
     get_date("current",current_date);
     get_date("target",target_date);
 
-//dtarget = calculate difference in days between given date and reference
-//dcurrent = calculate difference in days between today and reference
+    dcurrent = difference_to_y2k(current_date);
+    dtarget = difference_to_y2k(target_date);
+    printf("\ndcurrent is %d and dtarget is %d",dcurrent,dtarget);
 
 //calculate difference in days between check date and current date using dtarget and dcurrent
-
 //calculate weekday for each date using dtarget and dcurrent
 
     printf("\nToday, %s, is a ____. Target date given was %s "
-        "which was a _____, ___ days ago.\n",
-        current_date, target_date);
+        "which was a _____, %d days ago.\n",
+        current_date, target_date,(dcurrent - dtarget));
     return 0;
 }
 
@@ -71,6 +83,42 @@ bool check_dashes(char date[])
     }
     return check;
 } // end of check_dashes
+
+int difference_to_y2k(char date[])
+{
+    long diff = 0;
+    int year = extract_year(date);
+    int month = extract_month(date);
+    int day = extract_day(date);
+    int days_before_month[] = {0,31,59,90,130,151,181,212,243,273,304,334};
+
+    // should -1 from the day, but should +1 for 2000 being leap year
+    diff += (year - 2000) * 365.25
+        +days_before_month[month-1]
+        +day;
+    return diff;
+}
+
+int extract_day(char date[])
+{
+    int day = ((int) (date[8] - '0'))*10 + (int) (date[9] - '0');
+    return day;
+} // end of extract_day
+
+int extract_month(char date[])
+{
+    int month = ((int) (date[5] - '0'))*10 + (int) (date[6] - '0');
+    return month;
+} // end of extract_month
+
+int extract_year(char date[])
+{
+    int year = ((int) (date[0] - '0'))*1000
+        + ((int) (date[1] - '0'))*100
+        + ((int) (date[2] - '0'))*10
+        + (int) (date[3] - '0');
+    return year;
+} // end of extract_year
 
 void get_date(char date_type[], char date[])
 {
@@ -105,12 +153,9 @@ bool is_leap_year(int year)
 bool valid_date(char date[])
 {
     bool check = false;
-    int year = ((int) (date[0] - '0'))*1000
-        + ((int) (date[1] - '0'))*100
-        + ((int) (date[2] - '0'))*10
-        + (int) (date[3] - '0');
-    int month = ((int) (date[5] - '0'))*10 + (int) (date[6] - '0');
-    int day = ((int) (date[8] - '0'))*10 + (int) (date[9] - '0');
+    int year = extract_year(date);
+    int month = extract_month(date);
+    int day = extract_day(date);
     if(month >= 1 && month <= 12)
     {
         if(day > 0)
