@@ -12,16 +12,23 @@
 
 #include<stdbool.h>
 #include<stdio.h>
+#include<stdlib.h>
 #include<string.h>
+
+// ATTENTION: changing BASELINE_YEAR will invalidate order of DAY_NAMES
+int BASELINE_YEAR = 2000;
+// ATTENTION: changing BASELINE_YEAR will invalidate order of DAY_NAMES
+char DAY_NAMES[7][10] = {"Saturday","Sunday","Monday","Tuesday",
+                        "Wednesday","Thursday","Friday"};
 
 // check that the dashes in a date string are in the correct position
 // and only in the correct position
 bool check_dashes(char date[]);
 
-// receives a date in proper format and returns difference in days
-// from 2000-01-01 to given date. Result is positive if date is after
-// 2000-01-01, negative if before
-int difference_to_y2k(char date[]);
+// receives a date in proper format and returns difference in days from
+// Jan 1st of BASELINE_YEAR to given date. Result is positive if date is after
+// that baseline, negative if before
+int difference_to_baseline(char date[], char dow[]);
 
 // next three functions extract parts of a valid date
 int extract_day(char date[]);
@@ -45,22 +52,20 @@ int main(void)
     int dcurrent, dtarget;
     char current_date[] = "0000-00-00";
     char target_date[] = "0000-00-00";
-//    char dow_current[10], dow_target[10];
+    char dow_current[10], dow_target[10];
 
     printf("\n");
     get_date("current",current_date);
     get_date("target",target_date);
 
-    dcurrent = difference_to_y2k(current_date);
-    dtarget = difference_to_y2k(target_date);
-    printf("\ndcurrent is %d and dtarget is %d",dcurrent,dtarget);
+    dcurrent = difference_to_y2k(current_date,dow_current);
+    dtarget = difference_to_y2k(target_date,dow_target);
 
-//calculate difference in days between check date and current date using dtarget and dcurrent
-//calculate weekday for each date using dtarget and dcurrent
+    printf("\nToday, %s, is a %s. Target date given was %s "
+        "which was a %s, %d days ago.\n",
+        current_date, dow_current, target_date, dow_target,
+        (dcurrent - dtarget));
 
-    printf("\nToday, %s, is a ____. Target date given was %s "
-        "which was a _____, %d days ago.\n",
-        current_date, target_date,(dcurrent - dtarget));
     return 0;
 }
 
@@ -84,7 +89,7 @@ bool check_dashes(char date[])
     return check;
 } // end of check_dashes
 
-int difference_to_y2k(char date[])
+int difference_to_baseline(char date[], char dow[])
 {
     long diff = 0;
     int year = extract_year(date);
@@ -93,9 +98,21 @@ int difference_to_y2k(char date[])
     int days_before_month[] = {0,31,59,90,130,151,181,212,243,273,304,334};
 
     // should -1 from the day, but should +1 for 2000 being leap year
-    diff += (year - 2000) * 365.25
+    diff += (year - BASELINE_YEAR) * 365.25
         +days_before_month[month-1]
         +day;
+
+    if(year < BASELINE_YEAR)
+    {
+        // Account for the baseline date...
+        diff--;
+        // ... and count back the leap day of target year
+        if(is_leap_year(year) && month > 2){diff++;}
+    }
+
+    if(diff >=0) {strcpy(dow,DAY_NAMES[diff % 7]);}
+    else {strcpy(dow,DAY_NAMES[7 - (abs(diff) % 7)]);}
+
     return diff;
 }
 
@@ -183,8 +200,7 @@ bool valid_date(char date[])
 bool verify_date(char date[])
 {
     bool check = false;
-    if(strlen(date) == 10 && check_dashes(date)
-        && valid_date(date))
+    if(strlen(date) == 10 && check_dashes(date) && valid_date(date))
     {
         check = true;
     }
